@@ -8,13 +8,13 @@
   <style>
     :root {
       --bg: #07111f;
-      --bg-soft: #0f1a2d;
       --panel: rgba(12, 21, 37, 0.92);
       --line: rgba(148, 163, 184, 0.18);
       --text: #e5eef9;
       --muted: #95a7c4;
-      --accent: #f97316;
-      --accent-2: #22c55e;
+      --accent: #2563eb;
+      --accent-2: #16a34a;
+      --warn: #f97316;
       --danger: #ef4444;
       --shadow: 0 18px 44px rgba(2, 6, 23, 0.34);
     }
@@ -36,7 +36,7 @@
 
     #app {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 380px;
+      grid-template-columns: minmax(0, 1fr) 370px;
       width: 100%;
       height: 100%;
     }
@@ -54,13 +54,13 @@
 
     .hero {
       position: absolute;
-      top: 22px;
-      left: 22px;
-      width: min(560px, calc(100% - 44px));
-      padding: 18px 20px;
+      top: 18px;
+      left: 18px;
+      width: min(520px, calc(100% - 36px));
+      padding: 16px 18px;
       border: 1px solid var(--line);
       border-radius: 18px;
-      background: rgba(8, 16, 30, 0.75);
+      background: rgba(8, 16, 30, 0.72);
       backdrop-filter: blur(14px);
       box-shadow: var(--shadow);
       z-index: 5;
@@ -88,7 +88,7 @@
 
     .status-bar {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       flex-wrap: wrap;
       margin-top: 12px;
     }
@@ -107,26 +107,25 @@
       border-left: 1px solid var(--line);
       background: var(--panel);
       backdrop-filter: blur(18px);
-      box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.04);
     }
 
     .sidebar {
-      padding: 22px 20px 24px;
+      padding: 20px 18px 24px;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 14px;
     }
 
     .card {
       border: 1px solid var(--line);
       border-radius: 18px;
       padding: 16px;
-      background: rgba(15, 23, 42, 0.7);
+      background: rgba(15, 23, 42, 0.72);
       box-shadow: var(--shadow);
     }
 
     .card h2 {
-      margin: 0 0 12px;
+      margin: 0 0 10px;
       font-size: 16px;
       letter-spacing: 0.01em;
     }
@@ -186,8 +185,7 @@
     }
 
     .field input,
-    .field select,
-    .field textarea {
+    .field select {
       width: 100%;
       padding: 10px 12px;
       border-radius: 12px;
@@ -196,11 +194,6 @@
       color: var(--text);
       outline: none;
       font-size: 13px;
-    }
-
-    .field textarea {
-      min-height: 88px;
-      resize: vertical;
     }
 
     .field input[type="color"] {
@@ -248,10 +241,11 @@
       box-shadow: none;
     }
 
-    button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      box-shadow: none;
+    .selection-hint {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
     }
 
     .message {
@@ -260,13 +254,6 @@
       color: #cbd5e1;
       font-size: 12px;
       line-height: 1.5;
-    }
-
-    .selection-hint {
-      margin-top: 8px;
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.6;
     }
 
     @media (max-width: 1120px) {
@@ -288,17 +275,16 @@
       <div id="graph"></div>
       <div class="hero">
         <h1>毕业班提前考课程三维拓扑图</h1>
-        <p>课程名称为节点，同一学生同时参加两门课程时形成连线；线宽和提示内容反映共同学生数。</p>
+        <p>这是在原二维拓扑结构基础上转换得到的三维视图，打开页面后会直接显示初始拓扑布局，不会先清空成空白状态。</p>
         <ul>
-          <li>左键拖动画面可旋转视角，右键拖动画面可平移，滚轮可缩放。</li>
-          <li>直接拖动节点可以调整三维位置，拖完后会自动固定在当前位置。</li>
-          <li>点击节点或连线后，可在右侧面板里手动修改名称、人数、连接两端和权值等信息。</li>
+          <li>左键旋转视角，右键平移，滚轮缩放。</li>
+          <li>节点默认按原拓扑关系排布，可直接拖动任意节点微调位置。</li>
+          <li>右侧编辑框用于后续修改节点名称、人数、连线两端和权值。</li>
         </ul>
         <div class="status-bar">
-          <div class="pill">三维力导图</div>
-          <div class="pill">节点拖拽已开启</div>
-          <div class="pill">右侧编辑面板</div>
-          <div class="pill">浏览器本地保存</div>
+          <div class="pill">原拓扑结构转三维</div>
+          <div class="pill">默认直接显示</div>
+          <div class="pill">右侧编辑微调</div>
         </div>
       </div>
     </section>
@@ -312,7 +298,7 @@
             <div class="metric"><span>课程连接</span><strong id="metricLinks">0</strong></div>
             <div class="metric"><span>总权值</span><strong id="metricWeight">0</strong></div>
           </div>
-          <p class="note">提示：网页内的手动修改会保存在当前浏览器本地，不会自动回写到 GitHub 仓库；如果你想把编辑后的版本再次发布，我可以继续帮你同步。</p>
+          <p class="note">右侧编辑只用于后续微调。页面打开时会先按已有课程拓扑直接显示三维图，不需要手动初始化。</p>
         </section>
 
         <section class="card">
@@ -357,7 +343,7 @@
             <button id="releaseNodeBtn" class="secondary" type="button">释放位置</button>
             <button id="deleteNodeBtn" class="danger" type="button">删除节点</button>
           </div>
-          <div class="selection-hint" id="nodeHint">点击三维图中的节点，或在上方下拉框中选择节点。</div>
+          <div class="selection-hint">页面打开后会默认载入一个节点到编辑框；点击图中的其他节点后，会切换到对应节点进行修改。</div>
         </section>
 
         <section class="card">
@@ -393,7 +379,7 @@
             <button id="saveLinkBtn" type="button">保存连线</button>
             <button id="deleteLinkBtn" class="danger" type="button">删除连线</button>
           </div>
-          <div class="selection-hint" id="linkHint">点击三维图中的连线，或在上方下拉框中选择连线。</div>
+          <div class="selection-hint">页面打开后也会默认载入一条已有连线，方便直接做局部微调。</div>
         </section>
 
         <section class="card">
@@ -402,9 +388,9 @@
             <button id="reheatBtn" class="warn" type="button">重新布局</button>
             <button id="fitBtn" class="secondary" type="button">缩放到全图</button>
             <button id="saveLocalBtn" class="secondary" type="button">保存到浏览器</button>
-            <button id="downloadJsonBtn" class="secondary" type="button">下载当前 JSON</button>
+            <button id="downloadJsonBtn" class="secondary" type="button">下载 JSON</button>
             <button id="importJsonBtn" class="secondary" type="button">导入 JSON</button>
-            <button id="resetBtn" class="danger" type="button">恢复初始数据</button>
+            <button id="resetBtn" class="danger" type="button">恢复初始拓扑</button>
           </div>
           <input id="importJsonInput" type="file" accept=".json,application/json" hidden>
           <div class="message" id="message"></div>
@@ -416,8 +402,11 @@
   <script type="module">
     import SpriteText from 'https://esm.sh/three-spritetext@1.10.0';
 
-    const INITIAL_GRAPH_DATA = {"nodes": [{"id": "course_001", "name": "数字图像处理", "students": 13, "val": 13, "color": "#60a5fa"}, {"id": "course_002", "name": "汇编语言程序设计", "students": 9, "val": 9, "color": "#34d399"}, {"id": "course_003", "name": "Android应用开发", "students": 8, "val": 8, "color": "#f97316"}, {"id": "course_004", "name": "人工智能", "students": 7, "val": 7, "color": "#eab308"}, {"id": "course_005", "name": "信息安全的数学基础", "students": 6, "val": 6, "color": "#a78bfa"}, {"id": "course_006", "name": "数据库系统概论（双语教学）", "students": 6, "val": 6, "color": "#f472b6"}, {"id": "course_007", "name": "Python程序设计", "students": 5, "val": 5, "color": "#38bdf8"}, {"id": "course_008", "name": "Go程序设计", "students": 5, "val": 5, "color": "#22c55e"}, {"id": "course_009", "name": "JavaEE架构与程序设计", "students": 4, "val": 4, "color": "#fb7185"}, {"id": "course_010", "name": "计算机图形学", "students": 4, "val": 4, "color": "#f59e0b"}, {"id": "course_011", "name": "计算机组成原理", "students": 3, "val": 3, "color": "#2dd4bf"}, {"id": "course_012", "name": "智能媒体动漫创作", "students": 2, "val": 2, "color": "#818cf8"}, {"id": "course_013", "name": "数据安全与隐私保护", "students": 2, "val": 2, "color": "#c084fc"}, {"id": "course_014", "name": "嵌入式系统与设计", "students": 2, "val": 2, "color": "#4ade80"}, {"id": "course_015", "name": "Hyperledger Fabric部署及开发", "students": 2, "val": 2, "color": "#f43f5e"}, {"id": "course_016", "name": "影视编导与制作基础", "students": 1, "val": 1, "color": "#06b6d4"}, {"id": "course_017", "name": "物联网控制技术", "students": 1, "val": 1, "color": "#84cc16"}, {"id": "course_018", "name": "用户界面设计", "students": 1, "val": 1, "color": "#facc15"}, {"id": "course_019", "name": "高级语言程序设计", "students": 1, "val": 1, "color": "#3b82f6"}, {"id": "course_020", "name": "高级语言程序设计综合实训", "students": 1, "val": 1, "color": "#14b8a6"}], "links": [{"id": "link_001", "source": "course_001", "target": "course_002", "weight": 4, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_002", "source": "course_006", "target": "course_002", "weight": 4, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_003", "source": "course_008", "target": "course_001", "weight": 3, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_004", "source": "course_004", "target": "course_002", "weight": 3, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_005", "source": "course_005", "target": "course_006", "weight": 3, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_006", "source": "course_005", "target": "course_002", "weight": 3, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_007", "source": "course_001", "target": "course_010", "weight": 3, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_008", "source": "course_003", "target": "course_008", "weight": 2, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_009", "source": "course_003", "target": "course_007", "weight": 2, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_010", "source": "course_003", "target": "course_005", "weight": 2, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_011", "source": "course_003", "target": "course_001", "weight": 2, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_012", "source": "course_003", "target": "course_010", "weight": 2, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_013", "source": "course_008", "target": "course_005", "weight": 2, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_014", "source": "course_008", "target": "course_002", "weight": 2, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_015", "source": "course_008", "target": "course_010", "weight": 2, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_016", "source": "course_004", "target": "course_001", "weight": 2, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_017", "source": "course_004", "target": "course_006", "weight": 2, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_018", "source": "course_004", "target": "course_011", "weight": 2, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_019", "source": "course_005", "target": "course_001", "weight": 2, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_020", "source": "course_001", "target": "course_006", "weight": 2, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_021", "source": "course_001", "target": "course_011", "weight": 2, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_022", "source": "course_012", "target": "course_002", "weight": 2, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_023", "source": "course_002", "target": "course_010", "weight": 2, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_024", "source": "course_002", "target": "course_011", "weight": 2, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_025", "source": "course_003", "target": "course_009", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_026", "source": "course_003", "target": "course_004", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_027", "source": "course_003", "target": "course_006", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_028", "source": "course_003", "target": "course_012", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_029", "source": "course_003", "target": "course_002", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_030", "source": "course_003", "target": "course_017", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_031", "source": "course_003", "target": "course_011", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_032", "source": "course_003", "target": "course_019", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_033", "source": "course_003", "target": "course_020", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_034", "source": "course_008", "target": "course_015", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_035", "source": "course_008", "target": "course_004", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_036", "source": "course_008", "target": "course_014", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_037", "source": "course_008", "target": "course_013", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_038", "source": "course_008", "target": "course_006", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_039", "source": "course_008", "target": "course_012", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_040", "source": "course_008", "target": "course_011", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_041", "source": "course_015", "target": "course_004", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_042", "source": "course_015", "target": "course_013", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_043", "source": "course_009", "target": "course_004", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_044", "source": "course_009", "target": "course_002", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_045", "source": "course_009", "target": "course_017", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_046", "source": "course_009", "target": "course_018", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_047", "source": "course_009", "target": "course_010", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_048", "source": "course_009", "target": "course_011", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_049", "source": "course_007", "target": "course_004", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_050", "source": "course_007", "target": "course_005", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_051", "source": "course_007", "target": "course_014", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_052", "source": "course_007", "target": "course_006", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_053", "source": "course_007", "target": "course_002", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_054", "source": "course_004", "target": "course_005", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_055", "source": "course_004", "target": "course_013", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_056", "source": "course_004", "target": "course_019", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_057", "source": "course_004", "target": "course_020", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_058", "source": "course_005", "target": "course_014", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_059", "source": "course_005", "target": "course_012", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_060", "source": "course_005", "target": "course_010", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_061", "source": "course_014", "target": "course_001", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_062", "source": "course_014", "target": "course_006", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_063", "source": "course_014", "target": "course_002", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_064", "source": "course_014", "target": "course_010", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_065", "source": "course_016", "target": "course_001", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_066", "source": "course_016", "target": "course_010", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_067", "source": "course_001", "target": "course_012", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_068", "source": "course_006", "target": "course_010", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_069", "source": "course_012", "target": "course_010", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_070", "source": "course_012", "target": "course_011", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_071", "source": "course_017", "target": "course_010", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_072", "source": "course_010", "target": "course_011", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}, {"id": "link_073", "source": "course_019", "target": "course_020", "weight": 1, "color": "rgba(148, 163, 184, 0.55)"}]};
-    const STORAGE_KEY = `course-topology-3d:${location.pathname}`;
+    const INITIAL_GRAPH_DATA = {"nodes": [{"id": "course_001", "name": "数字图像处理", "students": 13, "val": 13, "color": "#60a5fa", "x": -63.85, "y": -34.66, "z": 11.86}, {"id": "course_002", "name": "汇编语言程序设计", "students": 9, "val": 9, "color": "#34d399", "x": -36.15, "y": -7.01, "z": 13.26}, {"id": "course_003", "name": "Android应用开发", "students": 8, "val": 8, "color": "#f97316", "x": 8.05, "y": 5.38, "z": 33.62}, {"id": "course_004", "name": "人工智能", "students": 7, "val": 7, "color": "#eab308", "x": 34.6, "y": -34.95, "z": 42.82}, {"id": "course_005", "name": "信息安全的数学基础", "students": 6, "val": 6, "color": "#a78bfa", "x": -72.32, "y": 11.5, "z": 44.6}, {"id": "course_006", "name": "数据库系统概论（双语教学）", "students": 6, "val": 6, "color": "#f472b6", "x": -87.73, "y": -13.25, "z": -31.11}, {"id": "course_007", "name": "Python程序设计", "students": 5, "val": 5, "color": "#38bdf8", "x": -44.09, "y": 80.42, "z": -29.33}, {"id": "course_008", "name": "Go程序设计", "students": 5, "val": 5, "color": "#22c55e", "x": -0.08, "y": -25.54, "z": 10.96}, {"id": "course_009", "name": "JavaEE架构与程序设计", "students": 4, "val": 4, "color": "#fb7185", "x": 61.89, "y": 81.4, "z": 5.31}, {"id": "course_010", "name": "计算机图形学", "students": 4, "val": 4, "color": "#f59e0b", "x": -53.61, "y": 35.74, "z": 41.88}, {"id": "course_011", "name": "计算机组成原理", "students": 3, "val": 3, "color": "#2dd4bf", "x": -4.38, "y": -64.73, "z": -50.05}, {"id": "course_012", "name": "智能媒体动漫创作", "students": 2, "val": 2, "color": "#818cf8", "x": -76.85, "y": -81.28, "z": -40.85}, {"id": "course_013", "name": "数据安全与隐私保护", "students": 2, "val": 2, "color": "#c084fc", "x": 158.12, "y": -12.64, "z": -37.7}, {"id": "course_014", "name": "嵌入式系统与设计", "students": 2, "val": 2, "color": "#4ade80", "x": -124.19, "y": 49.05, "z": -4.85}, {"id": "course_015", "name": "Hyperledger Fabric部署及开发", "students": 2, "val": 2, "color": "#f43f5e", "x": 155.44, "y": -72.26, "z": -1.7}, {"id": "course_016", "name": "影视编导与制作基础", "students": 1, "val": 1, "color": "#06b6d4", "x": -209.7, "y": -5.02, "z": -82.49}, {"id": "course_017", "name": "物联网控制技术", "students": 1, "val": 1, "color": "#84cc16", "x": 13.3, "y": 154.84, "z": -60.78}, {"id": "course_018", "name": "用户界面设计", "students": 1, "val": 1, "color": "#facc15", "x": 175.54, "y": 220.0, "z": -50.21}, {"id": "course_019", "name": "高级语言程序设计", "students": 1, "val": 1, "color": "#3b82f6", "x": 56.31, "y": -158.06, "z": -24.78}, {"id": "course_020", "name": "高级语言程序设计综合实训", "students": 1, "val": 1, "color": "#14b8a6", "x": 109.73, "y": -128.93, "z": -6.78}], "links": [{"id": "link_001", "source": "course_001", "target": "course_002", "weight": 4, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_002", "source": "course_006", "target": "course_002", "weight": 4, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_003", "source": "course_008", "target": "course_001", "weight": 3, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_004", "source": "course_004", "target": "course_002", "weight": 3, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_005", "source": "course_005", "target": "course_006", "weight": 3, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_006", "source": "course_005", "target": "course_002", "weight": 3, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_007", "source": "course_001", "target": "course_010", "weight": 3, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_008", "source": "course_003", "target": "course_008", "weight": 2, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_009", "source": "course_003", "target": "course_007", "weight": 2, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_010", "source": "course_003", "target": "course_005", "weight": 2, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_011", "source": "course_003", "target": "course_001", "weight": 2, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_012", "source": "course_003", "target": "course_010", "weight": 2, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_013", "source": "course_008", "target": "course_005", "weight": 2, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_014", "source": "course_008", "target": "course_002", "weight": 2, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_015", "source": "course_008", "target": "course_010", "weight": 2, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_016", "source": "course_004", "target": "course_001", "weight": 2, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_017", "source": "course_004", "target": "course_006", "weight": 2, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_018", "source": "course_004", "target": "course_011", "weight": 2, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_019", "source": "course_005", "target": "course_001", "weight": 2, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_020", "source": "course_001", "target": "course_006", "weight": 2, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_021", "source": "course_001", "target": "course_011", "weight": 2, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_022", "source": "course_012", "target": "course_002", "weight": 2, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_023", "source": "course_002", "target": "course_010", "weight": 2, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_024", "source": "course_002", "target": "course_011", "weight": 2, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_025", "source": "course_003", "target": "course_009", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_026", "source": "course_003", "target": "course_004", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_027", "source": "course_003", "target": "course_006", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_028", "source": "course_003", "target": "course_012", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_029", "source": "course_003", "target": "course_002", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_030", "source": "course_003", "target": "course_017", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_031", "source": "course_003", "target": "course_011", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_032", "source": "course_003", "target": "course_019", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_033", "source": "course_003", "target": "course_020", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_034", "source": "course_008", "target": "course_015", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_035", "source": "course_008", "target": "course_004", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_036", "source": "course_008", "target": "course_014", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_037", "source": "course_008", "target": "course_013", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_038", "source": "course_008", "target": "course_006", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_039", "source": "course_008", "target": "course_012", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_040", "source": "course_008", "target": "course_011", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_041", "source": "course_015", "target": "course_004", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_042", "source": "course_015", "target": "course_013", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_043", "source": "course_009", "target": "course_004", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_044", "source": "course_009", "target": "course_002", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_045", "source": "course_009", "target": "course_017", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_046", "source": "course_009", "target": "course_018", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_047", "source": "course_009", "target": "course_010", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_048", "source": "course_009", "target": "course_011", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_049", "source": "course_007", "target": "course_004", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_050", "source": "course_007", "target": "course_005", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_051", "source": "course_007", "target": "course_014", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_052", "source": "course_007", "target": "course_006", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_053", "source": "course_007", "target": "course_002", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_054", "source": "course_004", "target": "course_005", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_055", "source": "course_004", "target": "course_013", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_056", "source": "course_004", "target": "course_019", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_057", "source": "course_004", "target": "course_020", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_058", "source": "course_005", "target": "course_014", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_059", "source": "course_005", "target": "course_012", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_060", "source": "course_005", "target": "course_010", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_061", "source": "course_014", "target": "course_001", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_062", "source": "course_014", "target": "course_006", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_063", "source": "course_014", "target": "course_002", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_064", "source": "course_014", "target": "course_010", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_065", "source": "course_016", "target": "course_001", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_066", "source": "course_016", "target": "course_010", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_067", "source": "course_001", "target": "course_012", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_068", "source": "course_006", "target": "course_010", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_069", "source": "course_012", "target": "course_010", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_070", "source": "course_012", "target": "course_011", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_071", "source": "course_017", "target": "course_010", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_072", "source": "course_010", "target": "course_011", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}, {"id": "link_073", "source": "course_019", "target": "course_020", "weight": 1, "color": "rgba(148, 163, 184, 0.58)"}]};
+    const STORAGE_KEY = `course-topology-3d:${location.pathname}:v2`;
+
+    const viewport = document.getElementById('viewport');
+    const graphContainer = document.getElementById('graph');
 
     const nodeSelect = document.getElementById('nodeSelect');
     const linkSelect = document.getElementById('linkSelect');
@@ -436,52 +425,125 @@
     const linkColor = document.getElementById('linkColor');
     const linkIdField = document.getElementById('linkId');
 
-    const messageEl = document.getElementById('message');
     const metricNodes = document.getElementById('metricNodes');
     const metricLinks = document.getElementById('metricLinks');
     const metricWeight = document.getElementById('metricWeight');
+    const messageEl = document.getElementById('message');
 
     const defaultNodePalette = [
-      '#60a5fa', '#22c55e', '#f97316', '#eab308', '#a78bfa',
-      '#f472b6', '#38bdf8', '#34d399', '#fb7185', '#f59e0b'
+      '#60a5fa', '#34d399', '#f97316', '#eab308', '#a78bfa',
+      '#f472b6', '#38bdf8', '#22c55e', '#fb7185', '#f59e0b'
     ];
 
     const clone = value => JSON.parse(JSON.stringify(value));
     const round = value => Number(Number(value || 0).toFixed(2));
     const nodeRefId = ref => typeof ref === 'object' ? ref.id : ref;
 
-    const makeNodeLabel = node =>
-      `<div style="padding:4px 6px"><strong>${escapeHtml(node.name)}</strong><br>选考人数：${Number(node.students || 0)}<br>ID：${escapeHtml(node.id)}</div>`;
+    function normalizeColor(color) {
+      if (!color) return '#94a3b8';
+      if (color.startsWith('#')) return color;
+      const match = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
+      if (!match) return '#94a3b8';
+      return '#' + match.slice(1, 4).map(part => Number(part).toString(16).padStart(2, '0')).join('');
+    }
 
-    const makeLinkLabel = link => {
+    function normalizeState(rawState) {
+      const fallback = clone(INITIAL_GRAPH_DATA);
+      if (!rawState || !Array.isArray(rawState.nodes) || !Array.isArray(rawState.links)) {
+        return fallback;
+      }
+
+      const nodes = rawState.nodes.map((node, index) => ({
+        id: node.id || `course_${String(index + 1).padStart(3, '0')}`,
+        name: node.name || `课程 ${index + 1}`,
+        students: Math.max(0, Number(node.students ?? node.val ?? 0)),
+        val: Math.max(1, Number(node.val ?? node.students ?? 1)),
+        color: node.color || defaultNodePalette[index % defaultNodePalette.length],
+        x: Number.isFinite(Number(node.x)) ? Number(node.x) : (Number.isFinite(Number(fallback.nodes[index]?.x)) ? Number(fallback.nodes[index].x) : round((Math.random() - 0.5) * 160)),
+        y: Number.isFinite(Number(node.y)) ? Number(node.y) : (Number.isFinite(Number(fallback.nodes[index]?.y)) ? Number(fallback.nodes[index].y) : round((Math.random() - 0.5) * 160)),
+        z: Number.isFinite(Number(node.z)) ? Number(node.z) : (Number.isFinite(Number(fallback.nodes[index]?.z)) ? Number(fallback.nodes[index].z) : round((Math.random() - 0.5) * 120))
+      }));
+
+      const nodeIds = new Set(nodes.map(node => node.id));
+      const links = rawState.links
+        .map((link, index) => ({
+          id: link.id || `link_${String(index + 1).padStart(3, '0')}`,
+          source: nodeRefId(link.source),
+          target: nodeRefId(link.target),
+          weight: Math.max(1, Number(link.weight ?? 1)),
+          color: link.color || 'rgba(148, 163, 184, 0.58)'
+        }))
+        .filter(link => nodeIds.has(link.source) && nodeIds.has(link.target) && link.source !== link.target);
+
+      return { nodes, links };
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return normalizeState(INITIAL_GRAPH_DATA);
+        return normalizeState(JSON.parse(raw));
+      } catch (error) {
+        console.warn('Failed to load local state:', error);
+        return normalizeState(INITIAL_GRAPH_DATA);
+      }
+    }
+
+    let state = loadState();
+    let selection = {
+      nodeId: state.nodes[0]?.id || null,
+      linkId: state.links[0]?.id || null
+    };
+
+    function persistState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function getNodeById(nodeId) {
+      return state.nodes.find(node => node.id === nodeId) || null;
+    }
+
+    function getLinkById(linkId) {
+      return state.links.find(link => link.id === linkId) || null;
+    }
+
+    function escapeHtml(text) {
+      return String(text ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function makeNodeLabel(node) {
+      return `<div style="padding:4px 6px"><strong>${escapeHtml(node.name)}</strong><br>选考人数：${Number(node.students || 0)}<br>ID：${escapeHtml(node.id)}</div>`;
+    }
+
+    function makeLinkLabel(link) {
       const source = getNodeById(nodeRefId(link.source));
       const target = getNodeById(nodeRefId(link.target));
       return `<div style="padding:4px 6px"><strong>${escapeHtml(source?.name || nodeRefId(link.source))}</strong> ↔ <strong>${escapeHtml(target?.name || nodeRefId(link.target))}</strong><br>共同学生数：${Number(link.weight || 0)}<br>ID：${escapeHtml(link.id)}</div>`;
-    };
-
-    let state = loadState();
-    let selection = { nodeId: null, linkId: null };
-
-    const viewport = document.getElementById('viewport');
-    const graphContainer = document.getElementById('graph');
+    }
 
     const Graph = ForceGraph3D()(graphContainer)
       .backgroundColor('#07111f')
       .showNavInfo(false)
       .enableNodeDrag(true)
+      .nodeRelSize(6)
       .nodeOpacity(0.92)
-      .nodeRelSize(5)
+      .cooldownTime(6000)
       .nodeVal(node => Math.max(Number(node.val || node.students || 1), 1))
       .nodeColor(node => selection.nodeId === node.id ? '#fb923c' : (node.color || '#60a5fa'))
       .nodeLabel(node => makeNodeLabel(node))
       .linkLabel(link => makeLinkLabel(link))
-      .linkOpacity(0.42)
+      .linkOpacity(0.48)
       .linkWidth(link => {
         const weight = Number(link.weight || 1);
-        const base = 0.8 + Math.min(6, weight) * 0.45;
-        return selection.linkId === link.id ? base + 1.6 : base;
+        const base = 1.2 + Math.min(6, weight) * 0.45;
+        return selection.linkId === link.id ? base + 1.2 : base;
       })
-      .linkColor(link => selection.linkId === link.id ? '#f59e0b' : (link.color || 'rgba(148, 163, 184, 0.55)'))
+      .linkColor(link => selection.linkId === link.id ? '#f59e0b' : (link.color || 'rgba(148, 163, 184, 0.58)'))
       .linkDirectionalParticles(link => selection.linkId === link.id ? Math.min(10, Math.max(2, Number(link.weight || 1))) : 0)
       .linkDirectionalParticleWidth(2.5)
       .linkDirectionalParticleColor(() => '#ffd166')
@@ -489,24 +551,17 @@
         const sprite = new SpriteText(node.name);
         sprite.material.depthWrite = false;
         sprite.color = '#e2e8f0';
-        sprite.textHeight = 6.4;
+        sprite.textHeight = 6.5;
         sprite.center.y = -0.72;
         return sprite;
       })
       .nodeThreeObjectExtend(true)
       .onNodeClick(node => {
         selection.nodeId = node.id;
-        selection.linkId = null;
         refreshSelection();
       })
       .onLinkClick(link => {
         selection.linkId = link.id;
-        selection.nodeId = null;
-        refreshSelection();
-      })
-      .onBackgroundClick(() => {
-        selection.nodeId = null;
-        selection.linkId = null;
         refreshSelection();
       })
       .onNodeDrag(node => {
@@ -526,76 +581,39 @@
         targetNode.fy = targetNode.y;
         targetNode.fz = targetNode.z;
         persistState();
-        if (selection.nodeId === node.id) {
-          populateNodeForm(targetNode);
-        }
+        populateNodeForm(targetNode);
         syncGraph(false);
         showMessage(`已固定节点「${targetNode.name}」的位置。`);
       });
 
-    Graph.d3Force('charge').strength(-210);
-    Graph.d3Force('link').distance(link => Math.max(45, 120 - Number(link.weight || 1) * 11)).strength(0.75);
-
-    function escapeHtml(text) {
-      return String(text ?? '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#39;');
-    }
-
-    function loadState() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return clone(INITIAL_GRAPH_DATA);
-        const parsed = JSON.parse(raw);
-        if (!parsed || !Array.isArray(parsed.nodes) || !Array.isArray(parsed.links)) {
-          return clone(INITIAL_GRAPH_DATA);
-        }
-        return parsed;
-      } catch (error) {
-        console.warn('Failed to load local state:', error);
-        return clone(INITIAL_GRAPH_DATA);
-      }
-    }
-
-    function persistState() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    }
-
-    function getNodeById(nodeId) {
-      return state.nodes.find(node => node.id === nodeId) || null;
-    }
-
-    function getLinkById(linkId) {
-      return state.links.find(link => link.id === linkId) || null;
-    }
-
-    function generateNodeId() {
-      let next = state.nodes.length + 1;
-      while (getNodeById(`course_${String(next).padStart(3, '0')}`)) {
-        next += 1;
-      }
-      return `course_${String(next).padStart(3, '0')}`;
-    }
-
-    function generateLinkId() {
-      let next = state.links.length + 1;
-      while (getLinkById(`link_${String(next).padStart(3, '0')}`)) {
-        next += 1;
-      }
-      return `link_${String(next).padStart(3, '0')}`;
-    }
-
-    function nextNodeColor() {
-      return defaultNodePalette[state.nodes.length % defaultNodePalette.length];
-    }
+    Graph.d3Force('charge').strength(-220);
+    Graph.d3Force('link').distance(link => Math.max(45, 122 - Number(link.weight || 1) * 12)).strength(0.8);
 
     function refreshMetrics() {
       metricNodes.textContent = state.nodes.length;
       metricLinks.textContent = state.links.length;
       metricWeight.textContent = state.links.reduce((sum, link) => sum + Number(link.weight || 0), 0);
+    }
+
+    function fillSelect(select, options, placeholder, keepValue) {
+      select.innerHTML = '';
+      const empty = document.createElement('option');
+      empty.value = '';
+      empty.textContent = placeholder;
+      select.appendChild(empty);
+      for (const option of options) {
+        const el = document.createElement('option');
+        el.value = option.value;
+        el.textContent = option.label;
+        select.appendChild(el);
+      }
+      if (keepValue && [...select.options].some(option => option.value === keepValue)) {
+        select.value = keepValue;
+      } else if (options[0]) {
+        select.value = options[0].value;
+      } else {
+        select.value = '';
+      }
     }
 
     function rebuildSelectors() {
@@ -604,9 +622,9 @@
         .sort((a, b) => a.name.localeCompare(b.name, 'zh-CN'))
         .map(node => ({ value: node.id, label: `${node.name}（${Number(node.students || 0)}）` }));
 
-      fillSelect(nodeSelect, nodeOptions, '请选择节点');
-      fillSelect(linkSource, nodeOptions, '请选择起点');
-      fillSelect(linkTarget, nodeOptions, '请选择终点');
+      fillSelect(nodeSelect, nodeOptions, '请选择节点', selection.nodeId);
+      fillSelect(linkSource, nodeOptions, '请选择起点', linkSource.value);
+      fillSelect(linkTarget, nodeOptions, '请选择终点', linkTarget.value);
 
       const linkOptions = state.links
         .slice()
@@ -619,32 +637,14 @@
             label: `${source?.name || nodeRefId(link.source)} ↔ ${target?.name || nodeRefId(link.target)}（${Number(link.weight || 0)}）`
           };
         });
-      fillSelect(linkSelect, linkOptions, '请选择连线');
-    }
 
-    function fillSelect(select, options, placeholder) {
-      const current = select.value;
-      select.innerHTML = '';
-      const empty = document.createElement('option');
-      empty.value = '';
-      empty.textContent = placeholder;
-      select.appendChild(empty);
-      for (const option of options) {
-        const el = document.createElement('option');
-        el.value = option.value;
-        el.textContent = option.label;
-        select.appendChild(el);
-      }
-      if ([...select.options].some(option => option.value === current)) {
-        select.value = current;
-      } else {
-        select.value = '';
-      }
+      fillSelect(linkSelect, linkOptions, '请选择连线', selection.linkId);
+      if (!selection.nodeId && nodeOptions[0]) selection.nodeId = nodeOptions[0].value;
+      if (!selection.linkId && linkOptions[0]) selection.linkId = linkOptions[0].value;
     }
 
     function populateNodeForm(node) {
       if (!node) {
-        nodeSelect.value = '';
         nodeName.value = '';
         nodeStudents.value = '';
         nodeColor.value = '#60a5fa';
@@ -666,9 +666,6 @@
 
     function populateLinkForm(link) {
       if (!link) {
-        linkSelect.value = '';
-        linkSource.value = '';
-        linkTarget.value = '';
         linkWeight.value = 1;
         linkColor.value = '#94a3b8';
         linkIdField.value = '';
@@ -682,20 +679,11 @@
       linkIdField.value = link.id;
     }
 
-    function normalizeColor(color) {
-      if (!color) return '#94a3b8';
-      if (color.startsWith('#')) return color;
-      const match = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
-      if (!match) return '#94a3b8';
-      return '#' + match.slice(1, 4).map(part => Number(part).toString(16).padStart(2, '0')).join('');
-    }
-
     function refreshSelection() {
       const selectedNode = selection.nodeId ? getNodeById(selection.nodeId) : null;
       const selectedLink = selection.linkId ? getLinkById(selection.linkId) : null;
       populateNodeForm(selectedNode);
       populateLinkForm(selectedLink);
-      rebuildSelectors();
       if (selectedNode) nodeSelect.value = selectedNode.id;
       if (selectedLink) linkSelect.value = selectedLink.id;
       Graph.refresh();
@@ -711,6 +699,27 @@
       }
     }
 
+    function generateNodeId() {
+      let next = state.nodes.length + 1;
+      while (getNodeById(`course_${String(next).padStart(3, '0')}`)) next += 1;
+      return `course_${String(next).padStart(3, '0')}`;
+    }
+
+    function generateLinkId() {
+      let next = state.links.length + 1;
+      while (getLinkById(`link_${String(next).padStart(3, '0')}`)) next += 1;
+      return `link_${String(next).padStart(3, '0')}`;
+    }
+
+    function nextNodeColor() {
+      return defaultNodePalette[state.nodes.length % defaultNodePalette.length];
+    }
+
+    function showMessage(message, isError = false) {
+      messageEl.textContent = message;
+      messageEl.style.color = isError ? '#fda4af' : '#cbd5e1';
+    }
+
     function saveNode() {
       const node = selection.nodeId ? getNodeById(selection.nodeId) : null;
       if (!node) {
@@ -722,6 +731,7 @@
         showMessage('节点名称不能为空。', true);
         return;
       }
+
       node.name = name;
       node.students = Math.max(0, Number(nodeStudents.value || 0));
       node.val = Math.max(node.students, 1);
@@ -730,7 +740,6 @@
       const x = nodeX.value === '' ? null : Number(nodeX.value);
       const y = nodeY.value === '' ? null : Number(nodeY.value);
       const z = nodeZ.value === '' ? null : Number(nodeZ.value);
-
       if ([x, y, z].every(value => value !== null && Number.isFinite(value))) {
         node.x = round(x);
         node.y = round(y);
@@ -746,23 +755,18 @@
     }
 
     function addNode() {
-      const id = generateNodeId();
       const newNode = {
-        id,
+        id: generateNodeId(),
         name: `新课程 ${state.nodes.length + 1}`,
         students: 1,
         val: 1,
         color: nextNodeColor(),
-        x: round((Math.random() - 0.5) * 140),
-        y: round((Math.random() - 0.5) * 140),
-        z: round((Math.random() - 0.5) * 140),
+        x: round((Math.random() - 0.5) * 160),
+        y: round((Math.random() - 0.5) * 160),
+        z: round((Math.random() - 0.5) * 120)
       };
-      newNode.fx = newNode.x;
-      newNode.fy = newNode.y;
-      newNode.fz = newNode.z;
       state.nodes.push(newNode);
       selection.nodeId = newNode.id;
-      selection.linkId = null;
       persistState();
       syncGraph(false);
       showMessage(`已新增节点「${newNode.name}」。`);
@@ -782,30 +786,6 @@
       showMessage(`已释放节点「${node.name}」的位置固定。`);
     }
 
-    function deleteNode() {
-      const node = selection.nodeId ? getNodeById(selection.nodeId) : null;
-      if (!node) {
-        showMessage('请先选择一个节点。', true);
-        return;
-      }
-      const affectedLinks = state.links.filter(link => {
-        const source = nodeRefId(link.source);
-        const target = nodeRefId(link.target);
-        return source === node.id || target === node.id;
-      }).length;
-      state.nodes = state.nodes.filter(item => item.id !== node.id);
-      state.links = state.links.filter(link => {
-        const source = nodeRefId(link.source);
-        const target = nodeRefId(link.target);
-        return source !== node.id && target !== node.id;
-      });
-      selection.nodeId = null;
-      selection.linkId = null;
-      persistState();
-      syncGraph(true);
-      showMessage(`已删除节点「${node.name}」及其 ${affectedLinks} 条相关连线。`);
-    }
-
     function findLinkByEndpoints(sourceId, targetId, ignoreId = null) {
       return state.links.find(link => {
         if (ignoreId && link.id === ignoreId) return false;
@@ -816,6 +796,31 @@
           (source === targetId && target === sourceId)
         );
       }) || null;
+    }
+
+    function deleteNode() {
+      const node = selection.nodeId ? getNodeById(selection.nodeId) : null;
+      if (!node) {
+        showMessage('请先选择一个节点。', true);
+        return;
+      }
+      const removedLinkIds = state.links
+        .filter(link => nodeRefId(link.source) === node.id || nodeRefId(link.target) === node.id)
+        .map(link => link.id);
+
+      state.nodes = state.nodes.filter(item => item.id !== node.id);
+      state.links = state.links.filter(link => nodeRefId(link.source) !== node.id && nodeRefId(link.target) !== node.id);
+
+      if (selection.nodeId === node.id) {
+        selection.nodeId = state.nodes[0]?.id || null;
+      }
+      if (selection.linkId && removedLinkIds.includes(selection.linkId)) {
+        selection.linkId = state.links[0]?.id || null;
+      }
+
+      persistState();
+      syncGraph(true);
+      showMessage(`已删除节点「${node.name}」及其 ${removedLinkIds.length} 条相关连线。`);
     }
 
     function saveLink() {
@@ -836,25 +841,24 @@
       }
       const duplicate = findLinkByEndpoints(sourceId, targetId, link.id);
       if (duplicate) {
-        showMessage('这两个节点之间已经存在一条连线。', true);
+        showMessage('这两个节点之间已经存在连线。', true);
         return;
       }
+
       link.source = sourceId;
       link.target = targetId;
       link.weight = Math.max(1, Number(linkWeight.value || 1));
       link.color = linkColor.value || '#94a3b8';
       persistState();
       syncGraph(true);
-      const sourceName = getNodeById(sourceId)?.name || sourceId;
-      const targetName = getNodeById(targetId)?.name || targetId;
-      showMessage(`已保存连线「${sourceName} ↔ ${targetName}」。`);
+      showMessage('已保存当前连线。');
     }
 
     function addLink() {
-      const sourceId = linkSource.value || (state.nodes[0] ? state.nodes[0].id : '');
-      const targetId = linkTarget.value || (state.nodes[1] ? state.nodes[1].id : '');
+      const sourceId = linkSource.value || state.nodes[0]?.id || '';
+      const targetId = linkTarget.value || state.nodes[1]?.id || '';
       if (!sourceId || !targetId) {
-        showMessage('请先至少保留两个节点，再新增连线。', true);
+        showMessage('请至少保留两个节点后再新增连线。', true);
         return;
       }
       if (sourceId === targetId) {
@@ -864,9 +868,8 @@
       const duplicate = findLinkByEndpoints(sourceId, targetId);
       if (duplicate) {
         selection.linkId = duplicate.id;
-        selection.nodeId = null;
         refreshSelection();
-        showMessage('这两个节点之间已经有连线，已为你定位到现有连线。', true);
+        showMessage('这两个节点之间已经有连线，已定位到现有连线。', true);
         return;
       }
 
@@ -875,16 +878,13 @@
         source: sourceId,
         target: targetId,
         weight: Math.max(1, Number(linkWeight.value || 1)),
-        color: linkColor.value || '#94a3b8',
+        color: linkColor.value || '#94a3b8'
       };
       state.links.push(newLink);
       selection.linkId = newLink.id;
-      selection.nodeId = null;
       persistState();
       syncGraph(true);
-      const sourceName = getNodeById(sourceId)?.name || sourceId;
-      const targetName = getNodeById(targetId)?.name || targetId;
-      showMessage(`已新增连线「${sourceName} ↔ ${targetName}」。`);
+      showMessage('已新增一条连线。');
     }
 
     function deleteLink() {
@@ -893,13 +893,11 @@
         showMessage('请先选择一条连线。', true);
         return;
       }
-      const sourceName = getNodeById(nodeRefId(link.source))?.name || nodeRefId(link.source);
-      const targetName = getNodeById(nodeRefId(link.target))?.name || nodeRefId(link.target);
       state.links = state.links.filter(item => item.id !== link.id);
-      selection.linkId = null;
+      selection.linkId = state.links[0]?.id || null;
       persistState();
       syncGraph(true);
-      showMessage(`已删除连线「${sourceName} ↔ ${targetName}」。`);
+      showMessage('已删除当前连线。');
     }
 
     function reheatGraph() {
@@ -910,7 +908,7 @@
       }
       persistState();
       syncGraph(true);
-      showMessage('已释放所有节点并重新布局。');
+      showMessage('已按当前拓扑重新布局三维图。');
       window.setTimeout(() => Graph.zoomToFit(900, 90), 700);
     }
 
@@ -934,13 +932,9 @@
       const reader = new FileReader();
       reader.onload = event => {
         try {
-          const parsed = JSON.parse(String(event.target?.result || ''));
-          if (!parsed || !Array.isArray(parsed.nodes) || !Array.isArray(parsed.links)) {
-            throw new Error('JSON 结构无效');
-          }
-          state = parsed;
-          selection.nodeId = null;
-          selection.linkId = null;
+          state = normalizeState(JSON.parse(String(event.target?.result || '')));
+          selection.nodeId = state.nodes[0]?.id || null;
+          selection.linkId = state.links[0]?.id || null;
           persistState();
           syncGraph(true);
           showMessage('已导入 JSON 并刷新三维拓扑图。');
@@ -952,38 +946,29 @@
     }
 
     function resetGraph() {
-      if (!window.confirm('确定要恢复到初始课程拓扑数据吗？当前浏览器里的手动修改会丢失。')) {
+      if (!window.confirm('确定要恢复到原始拓扑数据吗？当前浏览器里的手动微调会丢失。')) {
         return;
       }
       localStorage.removeItem(STORAGE_KEY);
-      state = clone(INITIAL_GRAPH_DATA);
-      selection.nodeId = null;
-      selection.linkId = null;
+      state = normalizeState(INITIAL_GRAPH_DATA);
+      selection.nodeId = state.nodes[0]?.id || null;
+      selection.linkId = state.links[0]?.id || null;
       syncGraph(true);
-      showMessage('已恢复到初始数据。');
-    }
-
-    function showMessage(message, isError = false) {
-      messageEl.textContent = message;
-      messageEl.style.color = isError ? '#fda4af' : '#cbd5e1';
+      showMessage('已恢复到初始拓扑。');
     }
 
     function resizeGraph() {
-      const width = viewport.clientWidth;
-      const height = viewport.clientHeight;
-      Graph.width(width);
-      Graph.height(height);
+      Graph.width(viewport.clientWidth);
+      Graph.height(viewport.clientHeight);
     }
 
     nodeSelect.addEventListener('change', event => {
       selection.nodeId = event.target.value || null;
-      selection.linkId = null;
       refreshSelection();
     });
 
     linkSelect.addEventListener('change', event => {
       selection.linkId = event.target.value || null;
-      selection.nodeId = null;
       refreshSelection();
     });
 
@@ -997,7 +982,7 @@
     document.getElementById('deleteLinkBtn').addEventListener('click', deleteLink);
 
     document.getElementById('reheatBtn').addEventListener('click', reheatGraph);
-    document.getElementById('fitBtn').addEventListener('click', () => Graph.zoomToFit(800, 80));
+    document.getElementById('fitBtn').addEventListener('click', () => Graph.zoomToFit(900, 90));
     document.getElementById('saveLocalBtn').addEventListener('click', saveLocal);
     document.getElementById('downloadJsonBtn').addEventListener('click', downloadJson);
     document.getElementById('resetBtn').addEventListener('click', resetGraph);
@@ -1017,8 +1002,8 @@
 
     syncGraph(true);
     resizeGraph();
-    window.setTimeout(() => Graph.zoomToFit(900, 90), 900);
-    showMessage('三维拓扑图已加载，可直接拖动节点并在右侧编辑。');
+    window.setTimeout(() => Graph.zoomToFit(900, 90), 1000);
+    showMessage('已按原二维拓扑结构载入三维图，可直接在右侧编辑框里微调。');
   </script>
 </body>
 </html>
