@@ -623,6 +623,9 @@
       if (!rawState || !Array.isArray(rawState.nodes) || !Array.isArray(rawState.links)) {
         return fallback;
       }
+      if (rawState.nodes.length === 0 && fallback.nodes.length > 0) {
+        return fallback;
+      }
 
       const initialMap = new Map(fallback.nodes.map(node => [node.id, node]));
       const nodes = rawState.nodes.map((node, index) => {
