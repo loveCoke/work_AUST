@@ -90,6 +90,13 @@
       box-shadow: 0 0 18px rgba(255, 209, 102, 0.28);
     }
 
+    .node-label.is-neighbor {
+      color: #ecfeff;
+      border-color: rgba(103, 232, 249, 0.64);
+      background: rgba(8, 47, 73, 0.78);
+      box-shadow: 0 0 18px rgba(103, 232, 249, 0.24);
+    }
+
     .edge-label {
       color: #ffd08a;
       font-size: 11px;
@@ -111,6 +118,13 @@
       background: #ffd166;
       border-color: rgba(255, 255, 255, 0.68);
       box-shadow: 0 0 22px rgba(255, 209, 102, 0.42);
+    }
+
+    .edge-label.is-related {
+      color: #06262d;
+      background: #67e8f9;
+      border-color: rgba(255, 255, 255, 0.62);
+      box-shadow: 0 0 18px rgba(103, 232, 249, 0.32);
     }
 
     .student-popover {
@@ -422,7 +436,7 @@
         <ul>
           <li>左键旋转视角，右键平移，滚轮缩放。</li>
           <li>直接拖动球形节点即可微调空间位置，连线会实时跟随更新。</li>
-          <li>点击连线或权值数字可查看共同学生，两端节点会发亮显示。</li>
+          <li>点击节点可高亮相连课程并查看连接情况；点击连线数字可查看共同学生。</li>
         </ul>
         <div class="status-bar">
           <div class="pill">原拓扑结构转三维</div>
@@ -486,7 +500,7 @@
             <button id="resetNodeBtn" class="secondary" type="button">恢复初始位置</button>
             <button id="deleteNodeBtn" class="danger" type="button">删除节点</button>
           </div>
-          <div class="selection-hint">页面打开时会默认选中一个节点。点击图中的其他节点后，会切换到对应节点继续修改。</div>
+          <div class="selection-hint">点击图中的节点后，会高亮所有相连课程，并在左下角显示连接情况。</div>
         </section>
 
         <section class="card">
@@ -770,6 +784,7 @@
     let selection = {
       nodeId: state.nodes[0]?.id || null,
       linkId: state.links[0]?.id || null,
+      focusNodeId: null,
     };
 
     function getNodeById(nodeId) {
@@ -784,6 +799,34 @@
       const selectedLink = selection.linkId ? getLinkById(selection.linkId) : null;
       if (!selectedLink) return false;
       return nodeRefId(selectedLink.source) === nodeId || nodeRefId(selectedLink.target) === nodeId;
+    }
+
+    function getConnectedLinks(nodeId) {
+      return state.links.filter(link => nodeRefId(link.source) === nodeId || nodeRefId(link.target) === nodeId);
+    }
+
+    function getNeighborNodeIds(nodeId) {
+      return new Set(getConnectedLinks(nodeId).map(link => {
+        const source = nodeRefId(link.source);
+        const target = nodeRefId(link.target);
+        return source === nodeId ? target : source;
+      }));
+    }
+
+    function isLinkConnectedToFocusNode(link) {
+      return Boolean(
+        selection.focusNodeId &&
+        (nodeRefId(link.source) === selection.focusNodeId || nodeRefId(link.target) === selection.focusNodeId)
+      );
+    }
+
+    function getNodeHighlightKind(nodeId) {
+      if (selection.focusNodeId) {
+        if (nodeId === selection.focusNodeId) return 'focus';
+        if (getNeighborNodeIds(selection.focusNodeId).has(nodeId)) return 'neighbor';
+      }
+      if (isNodeOnSelectedLink(nodeId)) return 'link';
+      return selection.nodeId === nodeId ? 'selected' : '';
     }
 
     function persistState() {
@@ -819,6 +862,8 @@
       }
       if (keepValue && [...select.options].some(option => option.value === keepValue)) {
         select.value = keepValue;
+      } else if (keepValue === null || keepValue === '') {
+        select.value = '';
       } else if (options[0]) {
         select.value = options[0].value;
       } else {
@@ -849,8 +894,8 @@
         });
 
       fillSelect(linkSelect, linkOptions, '请选择连线', selection.linkId);
-      if (!selection.nodeId && nodeOptions[0]) selection.nodeId = nodeOptions[0].value;
-      if (!selection.linkId && linkOptions[0]) selection.linkId = linkOptions[0].value;
+      if (selection.nodeId && !getNodeById(selection.nodeId)) selection.nodeId = state.nodes[0]?.id || null;
+      if (selection.linkId && !getLinkById(selection.linkId)) selection.linkId = null;
     }
 
     function populateNodeForm(node) {
@@ -955,11 +1000,67 @@
       studentPopover.classList.remove('hidden');
     }
 
+    function showNodeConnections(node) {
+      if (!node) {
+        hideStudentPopover();
+        return;
+      }
+      const connectedLinks = getConnectedLinks(node.id)
+        .slice()
+        .sort((a, b) => Number(b.weight || 0) - Number(a.weight || 0));
+      const totalWeight = connectedLinks.reduce((sum, link) => sum + Number(link.weight || 0), 0);
+      const rows = connectedLinks.length
+        ? connectedLinks.map(link => {
+          const sourceId = nodeRefId(link.source);
+          const targetId = nodeRefId(link.target);
+          const neighbor = getNodeById(sourceId === node.id ? targetId : sourceId);
+          const students = normalizeStudents(link.students);
+          const studentText = students.length ? students.join('、') : '暂无记录';
+          return `
+            <tr>
+              <td>${escapeHtml(neighbor?.name || '未知课程')}</td>
+              <td>${escapeHtml(Number(link.weight || 0))}</td>
+              <td>${escapeHtml(studentText)}</td>
+            </tr>
+          `;
+        }).join('')
+        : '<tr><td colspan="3">该节点暂无连接课程</td></tr>';
+
+      studentPopover.innerHTML = `
+        <h3>${escapeHtml(node.name)} 的连接情况</h3>
+        <p>相连课程：${escapeHtml(connectedLinks.length)} 门，总权值：${escapeHtml(totalWeight)}，已高亮显示相连节点。</p>
+        <table>
+          <thead>
+            <tr>
+              <th>相连课程</th>
+              <th>权值</th>
+              <th>共同学生</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+      studentPopover.classList.remove('hidden');
+    }
+
+    function selectNode(nodeId, revealConnections = false) {
+      const node = nodeId ? getNodeById(nodeId) : null;
+      if (!node) return;
+      selection.nodeId = node.id;
+      selection.linkId = null;
+      selection.focusNodeId = node.id;
+      refreshSelection();
+      if (revealConnections) {
+        showNodeConnections(node);
+      }
+    }
+
     function selectLink(linkId, revealStudents = false) {
       const link = linkId ? getLinkById(linkId) : null;
       if (!link) return;
       selection.linkId = link.id;
       selection.nodeId = nodeRefId(link.source);
+      selection.focusNodeId = null;
       refreshSelection();
       if (revealStudents) {
         showLinkStudents(link);
@@ -1038,15 +1139,18 @@
         return;
       }
       visual.mesh.position.set(node.x, node.y, node.z);
-      const isLinked = isNodeOnSelectedLink(node.id);
+      const highlightKind = getNodeHighlightKind(node.id);
+      const isLinked = highlightKind === 'link' || highlightKind === 'focus';
+      const isNeighbor = highlightKind === 'neighbor';
       const isSelected = selection.nodeId === node.id;
       visual.material.color.set(node.color || '#60a5fa');
-      visual.material.emissive.set(isLinked ? '#ffd166' : (node.color || '#60a5fa'));
-      visual.material.emissiveIntensity = isLinked ? 1.1 : (isSelected ? 0.62 : 0.28);
+      visual.material.emissive.set(isLinked ? '#ffd166' : (isNeighbor ? '#67e8f9' : (node.color || '#60a5fa')));
+      visual.material.emissiveIntensity = isLinked ? 1.12 : (isNeighbor ? 0.92 : (isSelected ? 0.62 : 0.28));
       visual.labelEl.textContent = node.name;
       visual.labelEl.classList.toggle('is-linked', isLinked);
+      visual.labelEl.classList.toggle('is-neighbor', isNeighbor);
 
-      const scale = isLinked ? 1.28 : (isSelected ? 1.18 : 1);
+      const scale = isLinked ? 1.3 : (isNeighbor ? 1.2 : (isSelected ? 1.18 : 1));
       visual.mesh.scale.setScalar(scale);
     }
 
@@ -1070,11 +1174,14 @@
       visual.geometry.attributes.position.needsUpdate = true;
       visual.geometry.computeBoundingSphere();
 
-      const color = selection.linkId === link.id ? '#ffd166' : (link.color || '#8da0b8');
+      const isSelectedLink = selection.linkId === link.id;
+      const isRelatedToFocus = isLinkConnectedToFocusNode(link);
+      const color = isSelectedLink ? '#ffd166' : (isRelatedToFocus ? '#67e8f9' : (link.color || '#8da0b8'));
       visual.material.color.set(color);
-      visual.material.opacity = selection.linkId === link.id ? 0.98 : 0.72;
+      visual.material.opacity = isSelectedLink ? 0.98 : (isRelatedToFocus ? 0.92 : 0.72);
       visual.labelEl.textContent = String(link.weight);
-      visual.labelEl.classList.toggle('is-selected', selection.linkId === link.id);
+      visual.labelEl.classList.toggle('is-selected', isSelectedLink);
+      visual.labelEl.classList.toggle('is-related', !isSelectedLink && isRelatedToFocus);
       visual.labelEl.title = normalizeStudents(link.students).length
         ? `点击查看：${normalizeStudents(link.students).join('、')}`
         : '点击查看共同学生姓名';
@@ -1182,14 +1289,12 @@
         const node = getNodeById(mesh.userData.id);
         if (!node) return;
         draggedNodeId = node.id;
-        selection.nodeId = node.id;
-        hideStudentPopover();
+        selectNode(node.id, true);
         controls.enabled = false;
         camera.getWorldDirection(cameraDir);
         dragPlane.setFromNormalAndCoplanarPoint(cameraDir, mesh.position.clone());
         raycaster.ray.intersectPlane(dragPlane, dragPoint);
         dragOffset.copy(mesh.position).sub(dragPoint);
-        refreshSelection();
         return;
       }
 
@@ -1297,6 +1402,8 @@
       };
       state.nodes.push(newNode);
       selection.nodeId = newNode.id;
+      selection.linkId = null;
+      selection.focusNodeId = newNode.id;
       syncAll();
       showMessage(`已新增节点「${newNode.name}」。`);
     }
@@ -1332,6 +1439,7 @@
       state.links = state.links.filter(link => nodeRefId(link.source) !== node.id && nodeRefId(link.target) !== node.id);
       if (selection.nodeId === node.id) selection.nodeId = state.nodes[0]?.id || null;
       if (selection.linkId && removedLinkIds.includes(selection.linkId)) selection.linkId = state.links[0]?.id || null;
+      if (selection.focusNodeId === node.id) selection.focusNodeId = null;
       syncAll();
       showMessage(`已删除节点「${node.name}」及其 ${removedLinkIds.length} 条相关连线。`);
     }
@@ -1380,8 +1488,7 @@
       }
       const duplicate = findLinkByEndpoints(sourceId, targetId);
       if (duplicate) {
-        selection.linkId = duplicate.id;
-        refreshSelection();
+        selectLink(duplicate.id, false);
         showMessage('这两个节点之间已经有连线，已定位到现有连线。', true);
         return;
       }
@@ -1396,6 +1503,7 @@
       };
       state.links.push(newLink);
       selection.linkId = newLink.id;
+      selection.focusNodeId = null;
       syncAll();
       showMessage('已新增一条连线。');
     }
@@ -1408,6 +1516,7 @@
       }
       state.links = state.links.filter(item => item.id !== link.id);
       selection.linkId = state.links[0]?.id || null;
+      selection.focusNodeId = null;
       hideStudentPopover();
       syncAll();
       showMessage('已删除当前连线。');
@@ -1450,6 +1559,7 @@
           state = normalizeState(JSON.parse(String(event.target?.result || '')));
           selection.nodeId = state.nodes[0]?.id || null;
           selection.linkId = state.links[0]?.id || null;
+          selection.focusNodeId = null;
           hideStudentPopover();
           syncAll();
           frameScene();
@@ -1469,6 +1579,7 @@
       state = normalizeState(INITIAL_GRAPH_DATA);
       selection.nodeId = state.nodes[0]?.id || null;
       selection.linkId = state.links[0]?.id || null;
+      selection.focusNodeId = null;
       hideStudentPopover();
       syncAll();
       frameScene();
@@ -1488,13 +1599,23 @@
     renderer.domElement.addEventListener('pointerleave', onPointerUp);
 
     nodeSelect.addEventListener('change', event => {
-      selection.nodeId = event.target.value || null;
-      refreshSelection();
+      if (event.target.value) {
+        selectNode(event.target.value, true);
+      } else {
+        selection.nodeId = null;
+        selection.focusNodeId = null;
+        hideStudentPopover();
+        refreshSelection();
+      }
     });
 
     linkSelect.addEventListener('change', event => {
-      selection.linkId = event.target.value || null;
-      refreshSelection();
+      if (event.target.value) {
+        selectLink(event.target.value, false);
+      } else {
+        selection.linkId = null;
+        refreshSelection();
+      }
     });
 
     document.getElementById('addNodeBtn').addEventListener('click', addNode);
